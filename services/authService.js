@@ -26,4 +26,4 @@ async function signToken(user) {
 
 module.exports = {
   performAuthAndReturnToken,
-};
+}
