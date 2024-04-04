@@ -1,22 +1,16 @@
 
 const AuthService = require("../services/authService");
 
-const authenticationCallback = async function(req, res){
+const authenticateUser = async (req, res) => {
     try{
-        const response = await AuthService.handleAuthCallback(req, res);
-        res.send(response)
+        const response = await AuthService.performAuthAndReturnToken(req);
+        res.json(response);
     }
     catch(error){
-        res.send(error);
+        res.json(error)
     }
 }
 
-const handleLogin = async function(req, res){
-    res.redirect("/auth/google");
-}
-
-
 module.exports = {
-    authenticationCallback,
-    handleLogin
+    authenticateUser,
 }

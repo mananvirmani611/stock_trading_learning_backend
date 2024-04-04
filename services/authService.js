@@ -1,29 +1,29 @@
-const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
-require('dotenv').config();
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
 
-const GOOGLE_CLIENT_ID =
-  process.env.GOOGLE_CLIENT_ID
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const performAuthAndReturnToken = async (req) => {
+  try {
+    const user = { id: req.body.id, username: null };
+    let currToken = await signToken(user);
+    return {token : currToken};
+  }
+  catch (err) {
+    return err;
+  }
+}
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback",
-    },
-    function (accessToken, refreshToken, profile, done) {
-      return done(null, profile);
-    }
-  )
-);
-
-
-const handleAuthCallback = async (req, res) => {
-  res.send({success : true, email : req.session.passport.user});
-};
+async function signToken(user) {
+  return new Promise((resolve, reject) => {
+    jwt.sign({ user }, process.env.SECRET_KEY, { expiresIn: '24h' }, (err, token) => {
+      if (err) {
+        reject("Failed to generate token");
+      } else {
+        resolve(token);
+      }
+    });
+  })
+}
 
 module.exports = {
-  handleAuthCallback,
+  performAuthAndReturnToken,
 };
