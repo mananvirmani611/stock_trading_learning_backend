@@ -11,6 +11,17 @@ const authenticateUser = async (req, res) => {
     }
 }
 
+const returnEmail = async (req, res, next) => {
+    try{
+        const response = await AuthService.returnEmailIfTokenCorrect(req);
+        res.json(response);
+    }
+    catch(err){
+        res.json(err);
+    }
+}
+
 module.exports = {
     authenticateUser,
+    returnEmail,
 }

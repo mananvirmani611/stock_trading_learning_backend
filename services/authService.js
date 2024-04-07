@@ -3,13 +3,22 @@ require("dotenv").config();
 
 const performAuthAndReturnToken = async (req) => {
   try {
-    const user = { id: req.body.id, username: null };
+    const user = { id: req.body.id, username: req.body.email };
     let currToken = await signToken(user);
     return {token : currToken};
   }
   catch (err) {
     return err;
   }
+}
+
+const returnEmailIfTokenCorrect = async(req) => {
+    if(req.user){
+      return req.user;
+    }
+    else{
+      throw new Error("No email found");
+    }
 }
 
 async function signToken(user) {
@@ -26,4 +35,5 @@ async function signToken(user) {
 
 module.exports = {
   performAuthAndReturnToken,
+  returnEmailIfTokenCorrect,
 }
