@@ -19,7 +19,7 @@ const verifyToken = function(req, res, next){
         }
     }
     catch(err){
-        res.json(err.message);
+        res.status(403).json(err.message);
     }
 }
 
