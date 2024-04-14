@@ -5,7 +5,7 @@ const UserController = require('../controllers/userController');
 const TokenVerification = require('../services/TokenVerification');
 
 router.get('/current-balance', UserController.returnCurrentBalance);
-
+router.patch('/stock-record', UserController.updateStockRecord);
 
 module.exports = {
     router,

@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 
-
 const StockRecordSchema = new mongoose.Schema({
-    stockName : { type : String, unique : true},
-    purchasedAt : {type : Date},
+    recordId : {type : String, unique : true},
+    stockName : String,
+    purchasedAt : String,
     quantity : Number,
-    stockPrice : Number
+    stockPrice : Number,
+    totalValue : Number
 })
 
 const StockRecord = new mongoose.model('StockRecord', StockRecordSchema);
+
 module.exports = {
     StockRecord,
 }
