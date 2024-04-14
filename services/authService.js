@@ -1,13 +1,26 @@
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
+const { User } = require("../models/User");
 
 const performAuthAndReturnToken = async (req) => {
   try {
     const user = { id: req.body.id, username: req.body.email };
     let currToken = await signToken(user);
+    const existingUser = await User.findOne({email : req.body.email});
+    if(!existingUser){
+      const newUser = new User({
+        email : req.body.email,
+        balance : 5000,
+        totalInvestedAmount : 0,
+        stocksInHand : [],
+      })
+      await newUser.save();
+      console.log("NEW USER ADDED");
+    }
     return {token : currToken};
   }
   catch (err) {
+    console.log(err);
     return err;
   }
 }

@@ -18,9 +18,7 @@ const getStocksData = async (req) => {
         url += `?stock_name=${stock_name}`;
     }
 
-    console.log(url);
     const dataResponse = await ThirdPartyAPIService.get(url);
-    console.log(dataResponse.data);
     return dataResponse.data;
   } catch (error) {
     return error;
