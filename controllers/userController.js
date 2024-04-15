@@ -4,7 +4,6 @@ const UserService = require("../services/userService");
 const returnCurrentBalance = async function(req, res){
     try{
         const response = await UserService.fetchCurrentBalance(req);
-        console.log(response);
         res.json({balance : response});
     }
     catch(err){

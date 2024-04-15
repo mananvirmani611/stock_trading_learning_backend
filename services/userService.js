@@ -7,10 +7,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const fetchCurrentBalance = async(req) => {
     const email = req.query.email;
-    console.log(email);
     try{
         const currUser = await User.findOne({'email' : email}, 'balance');
-        console.log(currUser);
         return currUser.balance;
     }
     catch(err){
@@ -20,18 +18,22 @@ const fetchCurrentBalance = async(req) => {
 }
 
 const createStockRecordAndUpdateUser = async (req) => {
-    console.log(req.body);
     const date = moment().format("DD/MM/YYYY HH:mm:ss")
     let data = req.body;
+    const totalStockAmt = req.body.totalValue;
     const randomId = uuidv4();
     data = {
         ...data,
         purchasedAt : date,
         recordId : randomId
     }
-
     const newStockRecord = new StockRecord(data);
-    await newStockRecord.save();
+    await newStockRecord.save().then(async (savedData) => {
+        await User.findOneAndUpdate(
+            { email : req.body.email}, 
+            { $push : {stocksInHand : savedData}, $inc : { balance : -totalStockAmt }}
+        )
+    });
     return data;
 }
 
