@@ -6,6 +6,7 @@ const TokenVerification = require('../services/TokenVerification');
 
 router.get('/current-balance', UserController.returnCurrentBalance);
 router.patch('/stock-record', UserController.updateStockRecord);
+router.get('/data', UserController.getUserEntireData);
 
 module.exports = {
     router,

@@ -18,26 +18,68 @@ const fetchCurrentBalance = async(req) => {
 }
 
 const createStockRecordAndUpdateUser = async (req) => {
-    const date = moment().format("DD/MM/YYYY HH:mm:ss")
-    let data = req.body;
-    const totalStockAmt = req.body.totalValue;
-    const randomId = uuidv4();
-    data = {
-        ...data,
-        purchasedAt : date,
-        recordId : randomId
+    try{
+        const date = moment().format("DD/MM/YYYY HH:mm:ss")
+        let data = req.body;
+        const totalStockAmt = req.body.totalValue;
+        const randomId = uuidv4();
+        data = {
+            ...data,
+            purchasedAt : date,
+            recordId : randomId
+        }
+        const newStockRecord = new StockRecord(data);
+        await newStockRecord.save().then(async (savedData) => {
+            await User.findOneAndUpdate(
+                { email : req.body.email}, 
+                { $push : {stocksInHand : savedData}, $inc : { balance : -totalStockAmt }}
+            )
+        });
+        return data;
     }
-    const newStockRecord = new StockRecord(data);
-    await newStockRecord.save().then(async (savedData) => {
-        await User.findOneAndUpdate(
-            { email : req.body.email}, 
-            { $push : {stocksInHand : savedData}, $inc : { balance : -totalStockAmt }}
-        )
-    });
-    return data;
+    catch(err){
+        return err;
+    }
+}
+
+const fetchUserData = async(req) => {
+    try{
+        const email = req.query.email;
+        return new Promise(async (resolve, reject) => {
+            await User.findOne({email : email}, {stocksInHand : 1})
+            .then(async (response) => {
+                const stockIdArray = response.stocksInHand;
+                let stockArray = [];
+                stockArray = await iterateOnStockIdArray(stockIdArray);
+                resolve(stockArray);
+            })
+            .catch((err) => {
+                reject(err);
+            })
+        })
+    }
+    catch(err){
+        return err;
+    }
+} 
+
+const iterateOnStockIdArray = async function(stockIdArray){
+    let stockArray = [];
+    for(let i = 0; i<stockIdArray.length; i++){
+        await StockRecord.findById({_id : stockIdArray[i]})
+        .then((res) => {
+            console.log(res);
+            stockArray.push(res);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+    }
+    return stockArray;
 }
 
 module.exports = {
     fetchCurrentBalance,
     createStockRecordAndUpdateUser,
+    fetchUserData
 }
