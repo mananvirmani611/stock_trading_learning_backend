@@ -75,6 +75,7 @@ const iterateOnStockIdArray = async function(stockIdArray){
             console.log(err);
         })
     }
+    stockArray.reverse();
     return stockArray;
 }
 
