@@ -24,7 +24,17 @@ const updateStockRecord = async function(req, res){
 const getUserEntireData = async function(req, res){
     try{
         const response = await UserService.fetchUserData(req);
-        console.log("insdieee controller " + response);
+        res.send(response);
+    }
+    catch(err){
+        res.json(err);
+    }
+}
+
+const sellStockAndUpdateRecord = async function(req, res){
+    try{
+        const response = await UserService.sellStock(req);
+        console.log(response);
         res.send(response);
     }
     catch(err){
@@ -36,4 +46,5 @@ module.exports = {
     returnCurrentBalance,
     updateStockRecord,
     getUserEntireData,
+    sellStockAndUpdateRecord,
 }

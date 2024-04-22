@@ -63,12 +63,64 @@ const fetchUserData = async(req) => {
     }
 } 
 
+const sellStock = async function(req){
+    console.log(req.body);
+    const alreadyRecord = await StockRecord.findOne(
+        {recordId : req.body.recordId}
+    )
+
+    if(alreadyRecord.quantity === req.body.quantityToSell){
+        return new Promise(async (resolve, reject) => {
+            await StockRecord.deleteOne({recordId : req.body.recordId})
+            .then((res) => {
+                resolve(res);
+            });
+        })
+    }
+    else{
+        console.log("insidee this");
+        return new Promise(async (resolve, reject) => {
+            await StockRecord.findOneAndUpdate(
+                {recordId : req.body.recordId},
+                {quantity : alreadyRecord.quantity - req.body.quantityToSell}
+            )
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+
+            const userDetails = await User.findOne({email : req.body.username});
+
+            let stockRecordArray = userDetails.stocksInHand;
+
+            const newStockRecordArray = stockRecordArray.map((item) => {
+                if(item.recordId === req.body.recordId){
+                    item.quantity = alreadyRecord.quantity - req.body.quantity
+                }
+                return item;
+            })
+
+            await User.findOneAndUpdate(
+                {email : req.body.email},
+                {stocksInHand : newStockRecordArray}
+            )
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                reject(err);
+            })
+        })
+    }
+}
+
 const iterateOnStockIdArray = async function(stockIdArray){
     let stockArray = [];
     for(let i = 0; i<stockIdArray.length; i++){
         await StockRecord.findById({_id : stockIdArray[i]})
         .then((res) => {
-            console.log(res);
             stockArray.push(res);
         })
         .catch((err) => {
@@ -82,5 +134,6 @@ const iterateOnStockIdArray = async function(stockIdArray){
 module.exports = {
     fetchCurrentBalance,
     createStockRecordAndUpdateUser,
-    fetchUserData
+    fetchUserData,
+    sellStock
 }
