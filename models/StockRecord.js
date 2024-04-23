@@ -5,8 +5,9 @@ const StockRecordSchema = new mongoose.Schema({
     stockName : String,
     purchasedAt : String,
     quantity : Number,
-    stockPrice : Number,
-    totalValue : Number
+    purchaseQuantity : Number,
+    stockPurchasePrice : Number,
+    totalPurchaseValue : Number
 })
 
 const StockRecord = new mongoose.model('StockRecord', StockRecordSchema);

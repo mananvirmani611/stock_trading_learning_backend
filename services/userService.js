@@ -21,7 +21,7 @@ const createStockRecordAndUpdateUser = async (req) => {
     try{
         const date = moment().format("DD/MM/YYYY HH:mm:ss")
         let data = req.body;
-        const totalStockAmt = req.body.totalValue;
+        const totalPurchaseAmt = req.body.totalPurchaseValue;
         const randomId = uuidv4();
         data = {
             ...data,
@@ -32,7 +32,7 @@ const createStockRecordAndUpdateUser = async (req) => {
         await newStockRecord.save().then(async (savedData) => {
             await User.findOneAndUpdate(
                 { email : req.body.email}, 
-                { $push : {stocksInHand : savedData}, $inc : { balance : -totalStockAmt }}
+                { $push : {stocksInHand : savedData}, $inc : { balance : -totalPurchaseAmt }}
             )
         });
         return data;
@@ -71,10 +71,31 @@ const sellStock = async function(req){
 
     if(alreadyRecord.quantity === req.body.quantityToSell){
         return new Promise(async (resolve, reject) => {
-            await StockRecord.deleteOne({recordId : req.body.recordId})
-            .then((res) => {
-                resolve(res);
-            });
+            const userDetails = await User.findOne({email : req.body.username});
+            console.log("userrrrrrrrrrr " + userDetails);
+            let stockRecordArray = userDetails.stocksInHand;
+            console.log(stockRecordArray);
+
+            let filteredArray = [];
+            for(let i = 0; i<stockRecordArray.length; i++){
+                const stockRecord = await StockRecord.findOne({_id : stockRecordArray[i]});
+                // console.log(stockRecordRecordId);
+                if(stockRecord.recordId === req.body.recordId){
+                    continue;
+                }
+                filteredArray.push(stockRecordArray[i]);
+            }
+
+            console.log(filteredArray);
+            console.log("reqbodyyyyyyyyyyy ", req.body)
+            const updationResult = await User.findOneAndUpdate(
+                {email : req.body.username},
+                {stocksInHand : filteredArray, balance : (userDetails.balance + req.body.addBalance)}
+            )
+
+            const stockDeletionResponse = await StockRecord.deleteOne({recordId : req.body.recordId})
+            resolve("done");
+            //delete from user also
         })
     }
     else{
@@ -102,16 +123,12 @@ const sellStock = async function(req){
                 return item;
             })
 
-            await User.findOneAndUpdate(
-                {email : req.body.email},
-                {stocksInHand : newStockRecordArray}
+            const updationResult = await User.findOneAndUpdate(
+                {email : req.body.username},
+                {stocksInHand : newStockRecordArray, balance : (userDetails.balance + req.body.addBalance)}
             )
-            .then((res) => {
-                resolve(res);
-            })
-            .catch((err) => {
-                reject(err);
-            })
+
+            resolve("done");
         })
     }
 }
